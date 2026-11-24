@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RFID Scanning Ladder Trolley</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: shop-floor engineering sheet, plain and exact
+   IDEA: a GA drawing you can pick up and turn around
+   PICTURE: live 3D model of the trolley, mast, panel, reader and 8 antennas
+   COLOUR and TYPE: concrete grey ground, graphite ink, one signal-orange accent; Barlow Condensed + Barlow
+   LAYOUT: title strip, full-width model stage, then BOM and notes in two columns */
+:root{color-scheme:light dark;--bg:light-dark(#e7eaec,#111417);--ink:light-dark(#14181c,#e6e9ec);--mute:light-dark(#59616a,#9aa3ab);--card:light-dark(#ffffff,#1a1e22);--line:light-dark(#cfd4d8,#2b3137);--acc:#e2491f;--stage:light-dark(#dfe3e6,#171b1f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,3.5vw,48px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font:700 clamp(32px,4.6vw,50px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 10px;text-wrap:balance}
+h2{font:700 28px/1.1 "Barlow Condensed",sans-serif;margin:0 0 14px}
+.lede{color:var(--mute);max-width:70ch;margin:0}
+.dims{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-weight:600}
+.dims b{color:var(--acc);font:700 22px/1 "Barlow Condensed",sans-serif;margin-right:6px}
+.stage{position:relative;height:clamp(480px,80vh,880px);background:var(--stage);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+#labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;left:0;top:0;white-space:nowrap;font:600 13px/1 Barlow,sans-serif;background:var(--card);color:var(--ink);border:1px solid var(--line);padding:6px 9px 6px 20px;border-radius:999px;box-shadow:0 2px 8px #0002}
+.lb::before{content:"";position:absolute;left:8px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--acc)}
+.bar{position:absolute;display:flex;flex-wrap:wrap;gap:6px;z-index:2}
+.top{left:12px;top:12px;right:12px}
+.bot{left:12px;bottom:12px;right:12px}
+.bar .grp{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px}
+button{font:600 14px/1 Barlow,sans-serif;color:var(--ink);background:transparent;border:0;border-radius:7px;min-height:38px;padding:0 12px;cursor:pointer}
+button:hover{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+button[aria-pressed=true]{background:var(--acc);color:#fff}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hint{position:absolute;right:14px;bottom:70px;font-size:13px;color:var(--mute);z-index:1}
+.cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(20px,3vw,40px)}
+@media(max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);font-size:15px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:700 15px "Barlow Condensed",sans-serif;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+td.n{text-align:right;white-space:nowrap}
+td small{color:var(--mute);display:block}
+.notes{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.notes li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.notes b{display:block;font:700 18px/1.2 "Barlow Condensed",sans-serif;margin-bottom:3px}
+.foot{font-size:13px;color:var(--mute);margin-top:14px}
+@media(max-width:600px){.hint{display:none}.lb{font-size:12px;padding:5px 8px 5px 18px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 10px;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;font-weight:600;color:var(--mute)}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <h1>Mobile RFID scanning ladder with a Zebra FX9600-8 and eight UHF antennas</h1>
+  <p class="lede">A concept model built from your GA drawing. The 6 m aluminium mast stands on a castored trolley. The reader sits inside the 500×400×240 panel and each of its 8 ports feeds one antenna on the mast, so one pass along an aisle reads every rack level.</p>
+  <div class="dims"><span><b>6000</b>mm overall height</span><span><b>600</b>mm base width</span><span><b>480</b>mm base box</span><span><b>8</b>antennas at 600 mm pitch</span></div>
+</div></header>
+
+<section class="stage" id="stage">
+  <canvas id="c" aria-label="3D model of the RFID ladder trolley. Drag to rotate, scroll to zoom."></canvas>
+  <div id="labels"></div>
+  <div class="bar top">
+    <div class="grp" role="group" aria-label="View">
+      <button data-view="iso" aria-pressed="true">3D</button><button data-view="front">Front</button><button data-view="side">Side</button><button data-view="back">Rear</button>
+    </div>
+    <div class="grp" role="group" aria-label="Focus">
+      <button data-focus="all" aria-pressed="true">Whole unit</button><button data-focus="top">Mast top</button><button data-focus="panel">Panel and reader</button>
+    </div>
+  </div>
+  <div class="bar bot">
+    <div class="grp" role="group" aria-label="Show">
+      <button data-t="xray" aria-pressed="false">See inside panel</button><button data-t="rf" aria-pressed="true">Read fields</button><button data-t="cables" aria-pressed="true">Cables</button><button data-t="out" aria-pressed="true">Outriggers</button><button data-t="labels" aria-pressed="true">Labels</button><button data-t="person" aria-pressed="true">1.75 m person</button>
+    </div>
+    <div class="grp"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button></div>
+  </div>
+  <div class="hint">Drag to rotate · scroll to zoom</div>
+</section>
+
+<section class="band"><div class="wrap cols">
+  <div>
+    <h2>Bill of materials</h2>
+    <table class="stack">
+      <thead><tr><th>Item</th><th>Specification</th><th>Qty</th></tr></thead>
+      <tbody id="bom"></tbody>
+    </table>
+    <p class="foot">FX9600 size, weight and port data are from Zebra's spec sheet. The antenna is shown as a generic ~260 mm square circular-polarised panel (AN480 class), so check the exact model's size and bracket before you fabricate.</p>
+  </div>
+  <div>
+    <h2>Engineering notes</h2>
+    <ul class="notes" id="notes"></ul>
+  </div>
+</div></section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+{
+const bom=[
+ ["Zebra FX9600-8 fixed UHF RFID reader","273 × 184 × 50 mm, 2.13 kg, 8 monostatic RP-TNC ports, IP53","1"],
+ ["UHF panel antenna, circular polarised","≈ 260 × 260 × 35 mm (AN480 class), VESA / bracket mount","8"],
+ ["Low-loss coax, RP-TNC to antenna","Matched set from ~1.5 m (lowest) to ~5.5 m (top)","8"],
+ ["Electrical panel with rear door and fan","500 × 400 × 240 mm steel, IP54, cable glands on top","1"],
+ ["PoE+ injector (802.3at) or 24 V DC PSU","DIN-rail mounted inside the panel","1"],
+ ["Aluminium profile mast, 40 × 40","6000 mm overall, 9 rungs at 600 mm pitch, rear braces","1 set"],
+ ["Trolley base, plywood-clad frame","600 × 600 × 480 mm, ballast / battery bay inside","1"],
+ ["Swivel casters Ø100 mm","Two with brake on the push side","4"],
+ ["Fold-out outrigger legs with pads","Deploy before scanning","4"],
+ ["Push handle","Side mounted at ~1 m","1"]
+];
+const notes=[
+ ["Stability first","6 m on a 600 mm footprint is a 10 : 1 ratio, so the unit is top-heavy. Put ballast (or the battery) low in the base and deploy outriggers before scanning. Only move it with the outriggers retracted, at walking pace, on a flat floor."],
+ ["Reader placement","The FX9600 sits inside the panel just above the base, which keeps weight low and shortens cable runs. Point its LED face to the rear door so status is visible during service. The panel fan helps keep it under its 55 °C operating limit."],
+ ["Power","PoE+ (802.3at) gives the full 33 dBm transmit power; plain PoE limits it to 31.5 dBm. For cordless use, a 24 V DC battery in the base feeds the reader's DC input."],
+ ["Cables and per-port power","Top antennas need ~5 m runs, the lowest ~1.5 m. Use low-loss coax and raise transmit power on the long-run ports so all levels read evenly. Clip cables to the rear of the mast profile so they don't snag on racks."],
+ ["Antenna pitch","At 600 mm pitch the read fields overlap, so there are no blind levels between rack beams. Tilt the top antenna down 10–15° if the highest rack level is below 6 m."],
+ ["Transport height","A 6 m mast won't pass most dock doors. A hinge or bolted joint at ~2.4 m lets it fold for moving between buildings."]
+];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+document.getElementById('bom').innerHTML=bom.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td class="n">${esc(r[2])}</td></tr>`).join('');
+document.getElementById('notes').innerHTML=notes.map(n=>`<li><b>${esc(n[0])}</b>${esc(n[1])}</li>`).join('');
+
+const stage=document.getElementById('stage'),canvas=document.getElementById('c');
+if(!window.THREE){stage.insertAdjacentHTML('beforeend','<p style="position:absolute;inset:auto 0 50% 0;text-align:center">The 3D library could not load. Reload the page to try again.</p>');}
+else{
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(35,1,0.05,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f94,0.75));
+const sun=new THREE.DirectionalLight(0xffffff,0.85);sun.position.set(4,9,6);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-4,right:4,top:7,bottom:-1,near:1,far:25});scene.add(sun);
+const fill=new THREE.DirectionalLight(0xffffff,0.35);fill.position.set(-5,4,-6);scene.add(fill);
+
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.1},o));
+const alu=M(0xd0d6dc,{metalness:.55,roughness:.35}),aluDk=M(0x8d959d,{metalness:.5,roughness:.4});
+const ply=M(0xb4834f,{roughness:.8}),black=M(0x1d2023,{roughness:.6}),steel=M(0xd3d6d9,{roughness:.45,metalness:.2});
+const antM=M(0xeeeeea,{roughness:.6}),cableM=M(0x15171a,{roughness:.7}),gold=M(0xc9a24a,{metalness:.8,roughness:.3});
+const rubber=M(0x2a2d31,{roughness:.9}),red=M(0xd6382a),green=new THREE.MeshBasicMaterial({color:0x35d06b});
+const groups={};
+const grp=k=>{const g=new THREE.Group();scene.add(g);groups[k]=g;return g};
+const base=grp('frame'),cables=grp('cables'),rf=grp('rf'),outr=grp('out'),person=grp('person'),panel=grp('panel');
+function box(w,h,d,m,x,y,z,g=base){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;g.add(o);return o}
+function rod(a,b,r,m,g=base){const d=b.clone().sub(a);const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),14),m);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());o.castShadow=true;g.add(o);return o}
+
+// ground
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.22}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(12,24,0x8c949b,0x8c949b);grid.material.transparent=true;grid.material.opacity=.35;scene.add(grid);
+
+// casters
+for(const x of[-.25,.25])for(const z of[-.25,.25]){
+  const w=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.035,24),rubber);w.rotation.z=Math.PI/2;w.position.set(x,.05,z);w.castShadow=true;base.add(w);
+  box(.05,.03,.07,aluDk,x,.1,z);box(.09,.012,.09,aluDk,x,.122,z);
+  if(z<0)box(.02,.012,.05,red,x+.035,.075,z-.04);
+}
+// base box: frame + plywood skin
+const P=.04,bx=.28;
+for(const x of[-bx,bx])for(const z of[-bx,bx])box(P,.46,P,alu,x,.36,z);
+for(const y of[.15,.57]){for(const z of[-bx,bx])box(.6,P,P,alu,0,y,z);for(const x of[-bx,bx])box(P,P,.6,alu,x,y,0)}
+box(.52,.4,.012,ply,0,.36,.294);box(.52,.4,.012,ply,0,.36,-.294);box(.012,.4,.52,ply,.294,.36,0);box(.012,.4,.52,ply,-.294,.36,0);
+box(.56,.012,.56,ply,0,.17,0);
+box(.36,.18,.26,black,0,.27,0); // battery / ballast
+// lower cage under the panel
+for(const x of[-bx,bx]){box(P,.58,P,alu,x,.88,-bx);box(P,P,.3,alu,x,1.15,-.14);box(P,P,.3,alu,x,1.0,-.14)}
+box(.6,P,P,alu,0,1.15,-bx);box(.6,P,P,alu,0,.75,-bx);
+for(const x of[-bx,bx])rod(V(x,1.17,-bx),V(x,2.25,-.02),.012,aluDk);
+// push handle
+rod(V(-.3,1.0,-.2),V(-.44,1.0,-.2),.014,black);rod(V(-.44,1.0,-.2),V(-.44,1.0,.12),.016,black);rod(V(-.44,1.0,.12),V(-.3,1.0,.12),.014,black);
+box(.02,.02,.34,alu,-.3,1.0,-.04);
+
+// mast
+const top=6.0,yr=[];for(let y=1.2;y<=top+1e-6;y+=.6)yr.push(+y.toFixed(2));
+for(const x of[-bx,bx])box(P,top-.58,P,alu,x,(top+.58)/2,0);
+yr.forEach(y=>box(.52,P,P,alu,0,y-(y===top?.02:0),0));
+box(.52,P,P,alu,0,.6,0);
+// antennas
+const antY=yr.slice(0,-1).map(y=>+(y+.3).toFixed(2));
+antY.forEach((y,i)=>{
+  box(.52,.03,.02,aluDk,0,y,.03);                              // mount crossbar
+  box(.08,.08,.02,aluDk,0,y,.045);                             // bracket plate
+  const a=box(.26,.26,.035,antM,0,y,.073);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.03,12),gold);c.position.set(0,y-.145,.07);base.add(c);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(.85,1.7,40,1,true),new THREE.MeshBasicMaterial({color:0xe2491f,transparent:true,opacity:.075,depthWrite:false,side:THREE.DoubleSide}));
+  cone.rotation.x=-Math.PI/2;cone.position.set(0,y,.09+.85);rf.add(cone);
+});
+// beacon at top
+const bc=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.08,16),M(0xe2491f,{emissive:0x7a1c05}));bc.position.set(0,top+.04,0);base.add(bc);
+
+// electrical panel 500x400x240 behind mast
+const pc=V(0,1.37,-.14);
+const shellM=M(0xd3d6d9,{roughness:.45,metalness:.2,transparent:true});
+const shell=box(.5,.4,.24,shellM,pc.x,pc.y,pc.z,panel);
+const fan=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.012,28),black);fan.rotation.z=Math.PI/2;fan.position.set(.252,pc.y,pc.z);panel.add(fan);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(.064,.008,8,28),aluDk);ring.rotation.y=Math.PI/2;ring.position.set(.257,pc.y,pc.z);panel.add(ring);
+box(.012,.3,.02,black,-.2,pc.y,-.262,panel);   // door handle
+for(let i=0;i<4;i++){const g=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.03,14),black);g.position.set(-.15+i*.1,1.585,-.11);panel.add(g)}
+// internals
+const inner=new THREE.Group();scene.add(inner);groups.inner=inner;
+const rY=1.42,rZ=-.075;
+box(.273,.184,.05,black,0,rY,rZ,inner);
+for(let i=0;i<5;i++)box(.012,.006,.004,green,-.09+i*.022,rY-.06,rZ-.027,inner);
+const ports=[];for(let i=0;i<8;i++){const x=-.1225+i*.035;const c=new THREE.Mesh(new THREE.CylinderGeometry(.007,.007,.02,10),gold);c.position.set(x,rY+.102,rZ);inner.add(c);ports.push(V(x,rY+.112,rZ))}
+box(.42,.012,.035,aluDk,0,1.235,-.06,inner);             // DIN rail
+box(.1,.085,.06,M(0x3f6fb0),-.14,1.235,-.1,inner);       // PSU
+box(.07,.085,.06,M(0x2f3439),.0,1.235,-.1,inner);        // PoE+ injector
+for(let i=0;i<6;i++)box(.012,.05,.045,M(0x9aa0a6),.09+i*.016,1.235,-.09,inner);
+
+// coax runs: reader port -> top gland -> up the rear of the mast -> antenna connector
+antY.forEach((y,i)=>{
+  const s=i%2?1:-1,p=ports[i],xr=s*(.235-(Math.floor(i/2))*.008);
+  const pts=[p,V(p.x,1.52,rZ-.01),V(-.15+(i%4)*.1,1.6,-.11),V(xr,1.72,-.04),V(xr,y-.32,-.032),V(s*.16,y-.22,.02),V(s*.05,y-.18,.065),V(0,y-.16,.07)];
+  const t=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'catmullrom',.3),120,.0055,8,false),cableM);t.castShadow=true;cables.add(t);
+});
+
+// outriggers
+for(const sx of[-1,1])for(const sz of[-1,1]){
+  const a=V(sx*.3,.22,sz*.3),b=V(sx*.72,.04,sz*.72);
+  rod(a,b,.018,M(0xe2491f,{roughness:.5}),outr);
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(.06,.07,.025,24),rubber);pad.position.set(b.x,.0125,b.z);pad.castShadow=true;outr.add(pad);
+  box(.06,.06,.06,aluDk,a.x-sx*.01,a.y,a.z-sz*.01,outr);
+}
+// scale person
+{const pm=M(0xa8b0b7,{roughness:.9,transparent:true,opacity:.75});
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(.17,.13,.85,20),pm);body.position.set(-1.3,1.12,.7);
+ const legs=new THREE.Mesh(new THREE.CylinderGeometry(.13,.1,.8,20),pm);legs.position.set(-1.3,.4,.7);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.11,20,16),pm);head.position.set(-1.3,1.64,.7);
+ [body,legs,head].forEach(o=>{o.castShadow=true;person.add(o)});}
+
+// labels
+const L=[
+ ["UHF antenna ×8",V(.14,antY[6],.1),'frame'],
+ ["6000 mm aluminium mast",V(.3,4.2,0),'frame'],
+ ["Electrical panel 500×400×240",V(.26,1.52,-.2),'panel'],
+ ["Zebra FX9600-8 reader",V(0,rY,rZ-.03),'inner'],
+ ["PoE+ / 24 V supply",V(-.14,1.235,-.13),'inner'],
+ ["Push handle",V(-.44,1.0,-.05),'frame'],
+ ["Trolley base 600×600×480",V(.3,.45,.3),'frame'],
+ ["Outrigger",V(.72,.05,.72),'out'],
+ ["Coax to each antenna",V(.235,3.0,-.04),'cables'],
+ ["Read field",V(0,antY[3]+.6,1.2),'rf']
+];
+const lab=document.getElementById('labels');
+const lbs=L.map(([t,p,g])=>{const d=document.createElement('div');d.className='lb';d.textContent=t;lab.appendChild(d);return{d,p,g}});
+
+// toggles
+const st={xray:false,rf:true,cables:true,out:true,labels:true,person:true};
+function apply(){
+  shellM.opacity=st.xray?.16:1;shellM.depthWrite=!st.xray;fan.visible=ring.visible=true;
+  inner.visible=st.xray;rf.visible=st.rf;cables.visible=st.cables;outr.visible=st.out;person.visible=st.person;
+  lab.style.display=st.labels?'':'none';
+}
+apply();
+document.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.t;st[k]=!st[k];b.setAttribute('aria-pressed',st[k]);if(k==='xray'&&st.xray)setFocus('panel');apply();stop()}));
+
+// camera orbit
+const cam={th:.75,ph:1.25,r:12.5,t:V(0,3.0,0)},goal={th:.75,ph:1.25,r:12.5,t:V(0,3.0,0)};
+const views={iso:[.75,1.25],front:[0,1.5],side:[Math.PI/2,1.5],back:[Math.PI,1.5]};
+const focus={all:[12.5,V(0,3.0,0)],top:[3.6,V(0,4.9,0)],panel:[2.0,V(0,1.25,-.1)]};
+let auto=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stop=()=>{auto=false};
+function press(sel,el){document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',b===el))}
+function setFocus(k){const f=focus[k];goal.r=f[0];goal.t.copy(f[1]);press('[data-focus]',document.querySelector(`[data-focus="${k}"]`));if(k==='panel'&&Math.cos(goal.th)>0){goal.th=Math.PI-.6;goal.ph=1.3;press('[data-view]',null)}}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{const v=views[b.dataset.view];goal.th=v[0];goal.ph=v[1];press('[data-view]',b);stop()}));
+document.querySelectorAll('[data-focus]').forEach(b=>b.addEventListener('click',()=>{setFocus(b.dataset.focus);stop()}));
+document.getElementById('zin').onclick=()=>{goal.r=Math.max(1.2,goal.r*.8);stop()};
+document.getElementById('zout').onclick=()=>{goal.r=Math.min(18,goal.r*1.25);stop()};
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);stop()});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;goal.th-=(e.clientX-drag.x)*.008;goal.ph=Math.min(1.62,Math.max(.15,goal.ph-(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY};press('[data-view]',null)});
+canvas.addEventListener('pointerup',()=>{drag=null});canvas.addEventListener('pointercancel',()=>{drag=null});
+canvas.addEventListener('wheel',e=>{e.preventDefault();goal.r=Math.min(18,Math.max(1.2,goal.r*(1+e.deltaY*.0012)));stop()},{passive:false});
+
+function size(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+
+const tmp=new THREE.Vector3();
+function frame(){
+  if(auto)goal.th+=.0025;
+  cam.th+=(goal.th-cam.th)*.1;cam.ph+=(goal.ph-cam.ph)*.1;cam.r+=(goal.r-cam.r)*.1;cam.t.lerp(goal.t,.1);
+  const narrow=stage.clientWidth<600?1.35:1;
+  camera.position.set(cam.t.x+cam.r*narrow*Math.sin(cam.ph)*Math.sin(cam.th),cam.t.y+cam.r*narrow*Math.cos(cam.ph),cam.t.z+cam.r*narrow*Math.sin(cam.ph)*Math.cos(cam.th));
+  camera.lookAt(cam.t);
+  renderer.render(scene,camera);
+  if(st.labels){const W=stage.clientWidth,H=stage.clientHeight;
+    for(const l of lbs){const on=groups[l.g].visible;tmp.copy(l.p).project(camera);
+      if(!on||tmp.z>1||Math.abs(tmp.x)>1.05||Math.abs(tmp.y)>1.05){l.d.style.display='none';continue}
+      l.d.style.display='';const x=(tmp.x+1)/2*W,y=(1-tmp.y)/2*H;
+      l.d.style.transform=`translate(${Math.round(Math.min(x,W-l.d.offsetWidth-6))}px,${Math.round(y-14)}px)`;}}
+  requestAnimationFrame(frame);
+}
+frame();
+}
+}
+</script>
+</body>
+</html>
