@@ -56,8 +56,8 @@ td small{color:var(--mute);display:block}
 <body>
 <header class="band"><div class="wrap">
   <h1>Mobile RFID scanning ladder with a Zebra FX9600-8 and eight UHF antennas</h1>
-  <p class="lede">A concept model built from your GA drawing. The 6 m aluminium mast stands on a castored trolley. The reader sits inside the 500×400×240 panel and each of its 8 ports feeds one antenna on the mast, so one pass along an aisle reads every rack level.</p>
-  <div class="dims"><span><b>6000</b>mm overall height</span><span><b>600</b>mm base width</span><span><b>480</b>mm base box</span><span><b>8</b>antennas at 600 mm pitch</span></div>
+  <p class="lede">A concept model built from your GA drawing. The 6 m aluminium mast stands on a castored trolley. The reader sits inside the 500×400×240 panel and each of its 8 ports feeds one antenna on the mast, so one pass along an aisle reads every rack level. A 24 V battery and UPS in the base power everything, with or without a mains lead.</p>
+  <div class="dims"><span><b>6000</b>mm overall height</span><span><b>600</b>mm base width</span><span><b>480</b>mm base box</span><span><b>8</b>antennas at 600 mm pitch</span><span><b>24 V</b>50 Ah battery + UPS</span></div>
 </div></header>
 
 <section class="stage" id="stage">
@@ -68,12 +68,12 @@ td small{color:var(--mute);display:block}
       <button data-view="iso" aria-pressed="true">3D</button><button data-view="front">Front</button><button data-view="side">Side</button><button data-view="back">Rear</button>
     </div>
     <div class="grp" role="group" aria-label="Focus">
-      <button data-focus="all" aria-pressed="true">Whole unit</button><button data-focus="top">Mast top</button><button data-focus="panel">Panel and reader</button>
+      <button data-focus="all" aria-pressed="true">Whole unit</button><button data-focus="top">Mast top</button><button data-focus="panel">Panel and reader</button><button data-focus="power">Battery and UPS</button>
     </div>
   </div>
   <div class="bar bot">
     <div class="grp" role="group" aria-label="Show">
-      <button data-t="xray" aria-pressed="false">See inside panel</button><button data-t="rf" aria-pressed="true">Read fields</button><button data-t="cables" aria-pressed="true">Cables</button><button data-t="out" aria-pressed="true">Outriggers</button><button data-t="labels" aria-pressed="true">Labels</button><button data-t="person" aria-pressed="true">1.75 m person</button>
+      <button data-t="xray" aria-pressed="false">See inside panel</button><button data-t="basex" aria-pressed="false">See inside base</button><button data-t="rf" aria-pressed="true">Read fields</button><button data-t="cables" aria-pressed="true">Cables</button><button data-t="out" aria-pressed="true">Outriggers</button><button data-t="labels" aria-pressed="true">Labels</button><button data-t="person" aria-pressed="true">1.75 m person</button>
     </div>
     <div class="grp"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button></div>
   </div>
@@ -103,17 +103,24 @@ const bom=[
  ["UHF panel antenna, circular polarised","≈ 260 × 260 × 35 mm (AN480 class), VESA / bracket mount","8"],
  ["Low-loss coax, RP-TNC to antenna","Matched set from ~1.5 m (lowest) to ~5.5 m (top)","8"],
  ["Electrical panel with rear door and fan","500 × 400 × 240 mm steel, IP54, cable glands on top","1"],
- ["PoE+ injector (802.3at) or 24 V DC PSU","DIN-rail mounted inside the panel","1"],
+ ["24 V LiFePO4 battery, 50 Ah","≈ 1.28 kWh, ≈ 330 × 170 × 220 mm, ~13 kg, built-in BMS; sits low in the base as ballast","1"],
+ ["24 V DC UPS / smart charger","Charges the battery from mains and carries the load with no drop-out when unplugged","1"],
+ ["Mains inlet, battery isolator, SoC meter","IEC inlet with fuse, red rotary isolator and a voltage / state-of-charge display on the base side","1 set"],
+ ["DC fuse and distribution block","DIN rail in the panel: fused 24 V feeds to reader, fan and router","1"],
+ ["Wi-Fi / LTE router, 24 V","Links the reader to the WMS while the trolley moves","1"],
+ ["Power cable, 2 × 2.5 mm²","Base UPS to panel, clipped up the rear post","~1.5 m"],
  ["Aluminium profile mast, 40 × 40","6000 mm overall, 9 rungs at 600 mm pitch, rear braces","1 set"],
- ["Trolley base, plywood-clad frame","600 × 600 × 480 mm, ballast / battery bay inside","1"],
+ ["Trolley base, plywood-clad frame","600 × 600 × 480 mm, battery and UPS bay inside","1"],
  ["Swivel casters Ø100 mm","Two with brake on the push side","4"],
  ["Fold-out outrigger legs with pads","Deploy before scanning","4"],
  ["Push handle","Side mounted at ~1 m","1"]
 ];
 const notes=[
- ["Stability first","6 m on a 600 mm footprint is a 10 : 1 ratio, so the unit is top-heavy. Put ballast (or the battery) low in the base and deploy outriggers before scanning. Only move it with the outriggers retracted, at walking pace, on a flat floor."],
+ ["Stability first","6 m on a 600 mm footprint is a 10 : 1 ratio, so the unit is top-heavy. The ~13 kg battery sits on the base floor as ballast; add more weight low in the base if needed and deploy outriggers before scanning. Only move it with the outriggers retracted, at walking pace, on a flat floor."],
  ["Reader placement","The FX9600 sits inside the panel just above the base, which keeps weight low and shortens cable runs. Point its LED face to the rear door so status is visible during service. The panel fan helps keep it under its 55 °C operating limit."],
- ["Power","PoE+ (802.3at) gives the full 33 dBm transmit power; plain PoE limits it to 31.5 dBm. For cordless use, a 24 V DC battery in the base feeds the reader's DC input."],
+ ["Power: battery and UPS","The FX9600 runs straight off 24 V DC, which gives full transmit power without PoE+. Mains charges the 24 V LiFePO4 battery through the DC UPS. Unplug and the battery carries the load with no reboot."],
+ ["Runtime","Budget about 95 W worst case: the 78 W rating of Zebra's own 24 V supply plus the fan and router. Using 80% of 1.28 kWh gives about 10 hours, a full shift. Real draw is usually lower; measure it and resize the battery if needed."],
+ ["Electrical safety","Fuse the battery positive within 150 mm of the terminal, use the isolator before servicing, and charge only with the charger profile for LiFePO4. Keep the battery bay ventilated and the mains lead off the floor while scanning."],
  ["Cables and per-port power","Top antennas need ~5 m runs, the lowest ~1.5 m. Use low-loss coax and raise transmit power on the long-run ports so all levels read evenly. Clip cables to the rear of the mast profile so they don't snag on racks."],
  ["Antenna pitch","At 600 mm pitch the read fields overlap, so there are no blind levels between rack beams. Tilt the top antenna down 10–15° if the highest rack level is below 6 m."],
  ["Transport height","A 6 m mast won't pass most dock doors. A hinge or bolted joint at ~2.4 m lets it fold for moving between buildings."]
@@ -138,7 +145,7 @@ const fill=new THREE.DirectionalLight(0xffffff,0.35);fill.position.set(-5,4,-6);
 
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.1},o));
 const alu=M(0xd0d6dc,{metalness:.55,roughness:.35}),aluDk=M(0x8d959d,{metalness:.5,roughness:.4});
-const ply=M(0xb4834f,{roughness:.8}),black=M(0x1d2023,{roughness:.6}),steel=M(0xd3d6d9,{roughness:.45,metalness:.2});
+const ply=M(0xb4834f,{roughness:.8,transparent:true}),black=M(0x1d2023,{roughness:.6}),steel=M(0xd3d6d9,{roughness:.45,metalness:.2});
 const antM=M(0xeeeeea,{roughness:.6}),cableM=M(0x15171a,{roughness:.7}),gold=M(0xc9a24a,{metalness:.8,roughness:.3});
 const rubber=M(0x2a2d31,{roughness:.9}),red=M(0xd6382a),green=new THREE.MeshBasicMaterial({color:0x35d06b});
 const groups={};
@@ -163,7 +170,26 @@ for(const x of[-bx,bx])for(const z of[-bx,bx])box(P,.46,P,alu,x,.36,z);
 for(const y of[.15,.57]){for(const z of[-bx,bx])box(.6,P,P,alu,0,y,z);for(const x of[-bx,bx])box(P,P,.6,alu,x,y,0)}
 box(.52,.4,.012,ply,0,.36,.294);box(.52,.4,.012,ply,0,.36,-.294);box(.012,.4,.52,ply,.294,.36,0);box(.012,.4,.52,ply,-.294,.36,0);
 box(.56,.012,.56,ply,0,.17,0);
-box(.36,.18,.26,black,0,.27,0); // battery / ballast
+const pw=grp('power'),bin=grp('bin');
+// 24 V LiFePO4 battery
+box(.33,.22,.17,M(0x2b3a4a,{roughness:.55}),-.08,.288,.06,pw);
+box(.33,.012,.17,M(0x1b2530),-.08,.404,.06,pw);
+for(const [x,c] of [[-.2,0xd6382a],[.04,0x1d2023]]){const t=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.02,12),M(c));t.position.set(x,.42,.06);pw.add(t)}
+box(.2,.06,.003,M(0x3ec27a),-.08,.31,.147,pw);           // label band
+// DC UPS / charger
+box(.1,.17,.2,M(0x5a6570,{metalness:.3}),.18,.263,.02,pw);
+for(let i=0;i<6;i++)box(.102,.006,.16,M(0x3c444c),.18,.2+i*.022,.02,pw);
+box(.004,.025,.05,green,.231,.32,.08,pw);
+// fuse / busbar box
+box(.22,.09,.08,M(0x1d2023),-.02,.225,-.17,pw);
+box(.03,.04,.03,M(0xd6382a),-.1,.285,-.17,pw);
+// side controls on +x face
+box(.012,.07,.09,black,.305,.43,-.14,pw);               // IEC inlet
+box(.004,.03,.045,M(0x777f87),.312,.43,-.14,pw);
+const iso=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.025,24),M(0xd6382a));iso.rotation.z=Math.PI/2;iso.position.set(.31,.43,0);pw.add(iso);
+box(.008,.012,.06,M(0xf2c200),.325,.43,0,pw);
+box(.012,.06,.09,black,.305,.43,.14,pw);                // SoC meter
+box(.004,.035,.065,M(0x35d06b,{emissive:0x1d6e3a}),.312,.435,.14,pw);
 // lower cage under the panel
 for(const x of[-bx,bx]){box(P,.58,P,alu,x,.88,-bx);box(P,P,.3,alu,x,1.15,-.14);box(P,P,.3,alu,x,1.0,-.14)}
 box(.6,P,P,alu,0,1.15,-bx);box(.6,P,P,alu,0,.75,-bx);
@@ -216,6 +242,8 @@ antY.forEach((y,i)=>{
   const t=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'catmullrom',.3),120,.0055,8,false),cableM);t.castShadow=true;cables.add(t);
 });
 
+{const pts=[V(.18,.35,.02),V(.2,.5,-.15),V(.24,.62,-.26),V(.24,1.0,-.262),V(.2,1.13,-.22),V(.15,1.16,-.18)];
+ const t=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,false,'catmullrom',.3),80,.008,8,false),M(0xb3261e,{roughness:.6}));t.castShadow=true;cables.add(t);}
 // outriggers
 for(const sx of[-1,1])for(const sz of[-1,1]){
   const a=V(sx*.3,.22,sz*.3),b=V(sx*.72,.04,sz*.72);
@@ -236,9 +264,13 @@ const L=[
  ["6000 mm aluminium mast",V(.3,4.2,0),'frame'],
  ["Electrical panel 500×400×240",V(.26,1.52,-.2),'panel'],
  ["Zebra FX9600-8 reader",V(0,rY,rZ-.03),'inner'],
- ["PoE+ / 24 V supply",V(-.14,1.235,-.13),'inner'],
+ ["24 V fuses + Wi-Fi/LTE router",V(-.14,1.235,-.13),'inner'],
+ ["24 V LiFePO4 battery 50 Ah",V(-.2,.44,.06),'bin'],
+ ["DC UPS / charger",V(.2,.25,.13),'bin'],
+ ["Mains inlet · isolator · SoC meter",V(.31,.47,0),'power'],
+ ["Power cable to panel",V(.24,.85,-.262),'cables'],
  ["Push handle",V(-.44,1.0,-.05),'frame'],
- ["Trolley base 600×600×480",V(.3,.45,.3),'frame'],
+ ["Trolley base 600×600×480",V(-.3,.58,.3),'frame'],
  ["Outrigger",V(.72,.05,.72),'out'],
  ["Coax to each antenna",V(.235,3.0,-.04),'cables'],
  ["Read field",V(0,antY[3]+.6,1.2),'rf']
@@ -247,23 +279,24 @@ const lab=document.getElementById('labels');
 const lbs=L.map(([t,p,g])=>{const d=document.createElement('div');d.className='lb';d.textContent=t;lab.appendChild(d);return{d,p,g}});
 
 // toggles
-const st={xray:false,rf:true,cables:true,out:true,labels:true,person:true};
+const st={basex:false,xray:false,rf:true,cables:true,out:true,labels:true,person:true};
 function apply(){
   shellM.opacity=st.xray?.16:1;shellM.depthWrite=!st.xray;fan.visible=ring.visible=true;
+  ply.opacity=st.basex?.15:1;ply.depthWrite=!st.basex;bin.visible=st.basex;
   inner.visible=st.xray;rf.visible=st.rf;cables.visible=st.cables;outr.visible=st.out;person.visible=st.person;
   lab.style.display=st.labels?'':'none';
 }
 apply();
-document.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.t;st[k]=!st[k];b.setAttribute('aria-pressed',st[k]);if(k==='xray'&&st.xray)setFocus('panel');apply();stop()}));
+document.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.t;st[k]=!st[k];b.setAttribute('aria-pressed',st[k]);if(k==='xray'&&st.xray)setFocus('panel');if(k==='basex'&&st.basex)setFocus('power');apply();stop()}));
 
 // camera orbit
 const cam={th:.75,ph:1.25,r:12.5,t:V(0,3.0,0)},goal={th:.75,ph:1.25,r:12.5,t:V(0,3.0,0)};
 const views={iso:[.75,1.25],front:[0,1.5],side:[Math.PI/2,1.5],back:[Math.PI,1.5]};
-const focus={all:[12.5,V(0,3.0,0)],top:[3.6,V(0,4.9,0)],panel:[2.0,V(0,1.25,-.1)]};
+const focus={all:[12.5,V(0,3.0,0)],top:[3.6,V(0,4.9,0)],panel:[2.0,V(0,1.25,-.1)],power:[2.1,V(0,.35,0)]};
 let auto=!matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stop=()=>{auto=false};
 function press(sel,el){document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',b===el))}
-function setFocus(k){const f=focus[k];goal.r=f[0];goal.t.copy(f[1]);press('[data-focus]',document.querySelector(`[data-focus="${k}"]`));if(k==='panel'&&Math.cos(goal.th)>0){goal.th=Math.PI-.6;goal.ph=1.3;press('[data-view]',null)}}
+function setFocus(k){const f=focus[k];goal.r=f[0];goal.t.copy(f[1]);press('[data-focus]',document.querySelector(`[data-focus="${k}"]`));if(k==='panel'&&Math.cos(goal.th)>0){goal.th=Math.PI-.6;goal.ph=1.3;press('[data-view]',null)}if(k==='power'){goal.th=1.0;goal.ph=1.1;press('[data-view]',null);if(!st.basex){st.basex=true;document.querySelector('[data-t=basex]').setAttribute('aria-pressed','true');apply()}}}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{const v=views[b.dataset.view];goal.th=v[0];goal.ph=v[1];press('[data-view]',b);stop()}));
 document.querySelectorAll('[data-focus]').forEach(b=>b.addEventListener('click',()=>{setFocus(b.dataset.focus);stop()}));
 document.getElementById('zin').onclick=()=>{goal.r=Math.max(1.2,goal.r*.8);stop()};
